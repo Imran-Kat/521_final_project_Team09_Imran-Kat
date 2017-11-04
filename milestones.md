@@ -14,3 +14,5 @@ Nov. 18 - Start filming video for final presentation
 Nov. 28 - Final Code due at 7 pm  
 Nov. 29 - Finish final video edit  
 Nov. 30 - Kits due and presentation at 3 pm
+
+test edit
