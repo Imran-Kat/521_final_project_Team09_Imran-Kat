@@ -7,20 +7,32 @@
  * Reset button will reset counter for each new day or if device is worn by a new person in the middle of the day.
  * Each day, summation counter resets if date and time works on playground.
  * Left button will be used to make skin color measurement.
- * 
- * 
+ * Will utilize accelerometer in order to beep the person sooner if s/he was exercising and sweating.
+ * Parts based on Circuit Playground Analog Sensor Demo
  */
 
-// Circuit Playground Analog Sensor Demo
-// Shows how to read an analog sensor like temperature, light,
-// sound, or even external inputs and convert the analog value
-// to color and sound on the board.  Will light up NeoPixel 4 and 5
-// with a color proportional to the analog value, and if the slide
-// switch is turned to the left will play a music tone proportional
-// to the value.
 #include <Adafruit_CircuitPlayground.h>
 #include <Wire.h>
-#include <SPI.h>
+#include <SPI.h> // from analog sensor demo code
+//#include "Adafruit_SI1145.h" // will add when we have UV sensor
+
+
+// Used for blinking function
+// constants won't change. Used here to set a pin number :
+const int ledPin =  13;      // the number of the LED pin
+
+// Variables will change :
+int ledState = LOW;             // ledState used to set the LED
+
+// Generally, you should use "unsigned long" for variables that hold time
+// The value will quickly become too large for an int to store
+unsigned long previousMillis = 0;        // will store last time LED was updated
+
+// constants won't change :
+const long interval = 100;           // interval at which to blink (milliseconds)
+// end of blinking function variables
+
+
 
 // Change the analog input value below to try different sensors:
 #define ANALOG_INPUT  A5  // Specify the analog input to read.
@@ -53,24 +65,31 @@
 // mapping to the sensor value.
 #define TONE_FREQ_MIN    523  // C5 note
 #define TONE_FREQ_MAX    988  // B5 note
+
+uint32_t elapsedtime;
+uint32_t currenttime;
+uint32_t reapplytime;
 uint16_t UVsum = 0;
 
 void setup() {
-  // Setup serial port.
-  Serial.begin(115200);
-  Serial.println("Circuit Playground Analog Sensor Demos!");
-  // Setup Circuit Playground library.
-  CircuitPlayground.begin();
+  Serial.begin(9600); // Setup serial port.
+  Serial.println("Circuit Playground UV/photodiode sensor!");
+    CircuitPlayground.begin(); // Setup Circuit Playground library.
 }
 
 void loop() {
-  // Get the sensor sensor value and print it out (can use serial plotter
-  // to view realtime graph!).
+  // Get the sensor value and print it out (can use serial plotter
+  // to view realtime graph!)
   uint16_t value = analogRead(ANALOG_INPUT);
   Serial.println(value, DEC);
   UVsum = UVsum + value;
   Serial.println(UVsum, DEC);
 
+  if(UVsum > thresholdsum){
+    playalarm(); 
+  }
+  delay (120000); // wait 2 minutes (120,000 ms) for next reading
+  
   // Map the sensor value to a color.
   // Use the range of minimum and maximum sensor values and
   // min/max colors to do the mapping.
@@ -100,3 +119,24 @@ void loop() {
   // Delay for a bit and repeat the loop.
   delay(1000);
 }
+
+void playalarm(){ 
+  //code to play non-annoying alarm and light up lights
+unsigned long currentMillis = millis(); //current time
+while(blinkcounter < 10) { // only play alarm for 5 seconds)
+  currentMillis = millis(); // refresh current time
+  if (currenttime - previousMillis >= interval) {
+    // save the last time you blinked the LED
+    previousMillis = currentMillis;
+    // if the LED is off turn it on and vice-versa:
+    if (ledState == LOW) {
+      ledState = HIGH;
+    } else {
+      ledState = LOW;
+    }
+    blinkcounter++;
+    // set the LED with the ledState of the variable:
+    digitalWrite(ledPin, ledState);
+}
+} //end of while loop for blinking
+} //end of play alarm
