@@ -1,9 +1,14 @@
-/* Takes UV reading from sensor every 5 minutes.
+/* Takes UV reading from sensor every 1 minute.
  * Summation counter keeps tab of total UV exposure each day, so add newest reading to counter.
  * Lights will increase in number and intensity as total UV exposure (summation counter) increases.
  * Alarm will sound when total exposure reaches certain max threshold.
- * Right button will mute alarm and assume more sunscreen was applied. Will only increase UV counter summation by 5% for next 2 hours because assumes suncreen blocks 95% of UV light.
- * If you don't press button in the alarm time (30 seconds), assumes you didn't apply sunscreen.
+ * Right button will mute alarm and assume more sunscreen was applied. Will only increase UV counter summation by 5% for next 2 hours
+ * because assumes suncreen blocks 95% of UV light.
+ * If you don't press button in the alarm time (30 seconds), assumes you didn't apply sunscreen. Will increase UV counter by full amount
+ * for next 2 hours.
+ * Alarm will sound every 2 hours if alarm hasn't already sounded because of .
+ * Need a way to not increase UV counter and delay 2 hour alarm if indoors (maybe if UV sensing is below a certain amount, so thinks 
+ * you are indoors).
  * Reset button will reset counter for each new day or if device is worn by a new person in the middle of the day.
  * Each day, summation counter resets if date and time works on playground.
  * Left button will be used to make skin color measurement.
