@@ -1,4 +1,4 @@
-/* Takes UV reading from sensor every 1 minute.
+/* Takes UV reading from sensor every 1 or 2 minute(s).
  * Summation counter keeps tab of total UV exposure each day, so add newest reading to counter.
  * Lights will increase in number and intensity as total UV exposure (summation counter) increases.
  * Alarm will sound when total exposure reaches certain max threshold.
@@ -36,7 +36,7 @@ unsigned long previousMillis = 0;        // will store last time LED was updated
 // constants won't change :
 const long interval = 100;           // interval at which to blink (milliseconds)
 // end of blinking function variables
-
+unsigned long currentMillis = 0;
 
 
 // Change the analog input value below to try different sensors:
@@ -75,6 +75,8 @@ uint32_t elapsedtime;
 uint32_t currenttime;
 uint32_t reapplytime;
 uint16_t UVsum = 0;
+uint16_t blinkcounter = 0;
+uint32_t threshold = 2000; //threshold until warning alarm sounds and lights blink, resets after alarm
 
 void setup() {
   Serial.begin(9600); // Setup serial port.
@@ -90,14 +92,28 @@ void loop() {
   UVsum = UVsum + value;
   Serial.println(UVsum, DEC);
 
-  if(UVsum > thresholdsum){
-    playalarm(); 
+ // if(UVsum > threshold){
+  //  playalarm(); 
+ // }
+
+  if(UVsum > threshold){
+    currentMillis = millis(); //current time
+    while(blinkcounter < 5) { // only play alarm for 5 seconds)
+      CircuitPlayground.setPixelColor(1, 200, 200, 200);
+      delay(1000);
+      CircuitPlayground.clearPixels();
+      blinkcounter = blinkcounter + 1;
   }
-  delay (120000); // wait 2 minutes (120,000 ms) for next reading
+blinkcounter = 0;
+UVsum = 0;
+  }
+delay(1000);
+
   
   // Map the sensor value to a color.
   // Use the range of minimum and maximum sensor values and
   // min/max colors to do the mapping.
+/*  if(UVsum > threshold){
   int red = map(value, VALUE_MIN, VALUE_MAX, COLOR_RED_MIN, COLOR_RED_MAX);
   int green = map(value, VALUE_MIN, VALUE_MAX, COLOR_GREEN_MIN, COLOR_GREEN_MAX);
   int blue = map(value, VALUE_MIN, VALUE_MAX, COLOR_BLUE_MIN, COLOR_BLUE_MAX);
@@ -111,7 +127,9 @@ void loop() {
   CircuitPlayground.setPixelColor(7, red, green, blue);
   CircuitPlayground.setPixelColor(8, red, green, blue);
   CircuitPlayground.setPixelColor(9, red, green, blue);
-
+  }
+*/  
+  
   // Map the sensor value to a tone frequency.
   int frequency = map(value, VALUE_MIN, VALUE_MAX, TONE_FREQ_MIN, TONE_FREQ_MAX);
 
@@ -122,7 +140,8 @@ void loop() {
   }
 
   // Delay for a bit and repeat the loop.
-  delay(1000);
+  delay(1000); // wait 2 minutes (120,000 ms) for next reading
+
 }
 
 void playalarm(){ 
@@ -144,4 +163,24 @@ while(blinkcounter < 10) { // only play alarm for 5 seconds)
     digitalWrite(ledPin, ledState);
 }
 } //end of while loop for blinking
-} //end of play alarm
+} //end of play alarm function
+
+
+/*
+ *       currentMillis = millis(); // refresh current time
+        if (currenttime - previousMillis >= interval) {
+          // save the last time you blinked the LED
+          previousMillis = currentMillis;
+          // if the LED is off turn it on and vice-versa:
+          if (ledState == LOW) {
+            ledState = HIGH;
+          } else {
+            ledState = LOW;
+          }
+          blinkcounter++;
+          // set the LED with the ledState of the variable:
+          digitalWrite(ledPin, ledState);
+        }
+    } //end of while loop for blinking
+ * /
+ */
