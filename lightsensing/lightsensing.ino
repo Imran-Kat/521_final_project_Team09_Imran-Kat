@@ -26,7 +26,7 @@ Adafruit_SI1145 uv = Adafruit_SI1145();
 
 // Used for blinking function
 // constants won't change. Used here to set a pin number :
-const int ledPin =  13;      // the number of the LED pin
+const int ledPin =  9;      // the number of the LED pin
 
 // Variables will change :
 int ledState = LOW;             // ledState used to set the LED
@@ -36,7 +36,7 @@ int ledState = LOW;             // ledState used to set the LED
 unsigned long previousMillis = 0;        // will store last time LED was updated
 
 // constants won't change :
-const long interval = 100;           // interval at which to blink (milliseconds)
+const long interval = 400;           // interval at which to blink (milliseconds)
 // end of blinking function variables
 unsigned long currentMillis = 0;
 
@@ -59,6 +59,8 @@ uint32_t reapplytime;
 uint16_t UVsum = 0;
 uint16_t blinkcounter = 0;
 uint32_t threshold = 1000; //threshold until warning alarm sounds and lights blink, resets after alarm
+
+int cycles = 0;
 
 void setup() {
   Serial.begin(9600); // Setup serial port.
@@ -116,13 +118,18 @@ void loop() {
   
 
 if (UVsum > threshold){
+  Serial.print("beginning of if loop");
   CircuitPlayground.setPixelColor(5, 200, 000, 000);
   CircuitPlayground.setPixelColor(6, 200, 000, 000);
   CircuitPlayground.setPixelColor(7, 200, 000, 000);
   delay(1000);
   CircuitPlayground.clearPixels();
-  playtestsound();
+ // playtestsound();
   UVsum=0;
+  Serial.print("outside of while loop ");
+  Serial.println(cycles);
+  
+  blinklights();
 }
 
   
@@ -136,6 +143,34 @@ if (UVsum > threshold){
   // Delay for a bit and repeat the loop.
   delay(1000); // wait 2 minutes (120,000 ms) for next reading
 
+}
+
+void blinklights(){
+    while(cycles<10) {
+    unsigned long currentMillis = millis();
+    Serial.println("inside the while loop");
+    if (currentMillis - previousMillis >= interval) {
+      // save the last time you blinked the LED
+      previousMillis = currentMillis;
+      Serial.println("inside if statement of while loop, should blink");
+      Serial.print("value of cycles: ");
+      Serial.println(cycles);
+      // if the LED is off turn it on and vice-versa:
+      if (ledState == LOW) {
+        CircuitPlayground.setPixelColor(9, 200, 000, 000);
+        ledState = HIGH;
+      } else {
+        CircuitPlayground.setPixelColor(9, 000, 000, 000);
+        ledState = LOW;
+      }
+  
+      // set the LED with the ledState of the variable:
+      digitalWrite(ledPin, ledState);
+      cycles=cycles+1;
+    }
+    
+  }
+  cycles=0;
 }
 
 void playtestsound(){
