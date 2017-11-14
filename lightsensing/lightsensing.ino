@@ -22,6 +22,30 @@
 #include <SPI.h> // from analog sensor demo code
 #include "Adafruit_SI1145.h" // will add when we have UV sensor
 
+
+#define  c        261.626    // 261 Hz
+#define  d        293.665    // 294 Hz
+#define  e        329.628    // 329 Hz
+#define  f        349.228    // 349 Hz
+#define  g        391.995    // 392 Hz
+#define  a        440.000    // 440 Hz
+#define  b        493.883    // 493 Hz
+#define  C        523.251    // 523 Hz
+#define  R        0
+
+
+int melody[] = {  g, c, d, e, e, R, 
+                  e, d, e, c, c, R,
+                  c, d, e, f, a, R,
+                  a, g, f, e, R
+};
+int noteDurations[] = { 4, 4, 4, 4, 4, 8,
+                        4, 4, 4, 4, 4, 8,
+                        4, 4, 4, 4, 4, 8,
+                        4, 4, 4, 4, 8
+                      };
+
+
 Adafruit_SI1145 uv = Adafruit_SI1145();
 
 // Used for blinking function
@@ -58,12 +82,13 @@ uint32_t currenttime;
 uint32_t reapplytime;
 uint16_t UVsum = 0;
 uint16_t blinkcounter = 0;
-uint32_t threshold = 1000; //threshold until warning alarm sounds and lights blink, resets after alarm
+uint32_t threshold = 500; //threshold until warning alarm sounds and lights blink, resets after alarm
 
 int cycles = 0;
 
 void setup() {
   Serial.begin(9600); // Setup serial port.
+  Serial.begin(115200);
   Serial.println("Circuit Playground UV/photodiode sensor!");
   CircuitPlayground.begin(); // Setup Circuit Playground library.
 }
@@ -124,7 +149,7 @@ if (UVsum > threshold){
   CircuitPlayground.setPixelColor(7, 200, 000, 000);
   delay(1000);
   CircuitPlayground.clearPixels();
- // playtestsound();
+  playtestsound();
   UVsum=0;
   Serial.print("outside of while loop ");
   Serial.println(cycles);
@@ -173,10 +198,41 @@ void blinklights(){
   cycles=0;
 }
 
+/*void colorsense(){
+  bool left_first = CircuitPlayground.leftButton();
+  delay(20);
+  bool left_second = CircuitPlayground.leftButton();
+   if (left_first && !left_second) {
+    CircuitPlayground.clearPixels();
+    uint8_t red, green, blue;
+    CircuitPlayground.senseColor(red, green, blue);
+    Serial.print("Color: red=");
+    Serial.print(red, DEC);
+    Serial.print(" green=");
+    Serial.print(green, DEC);
+    Serial.print(" blue=");
+    Serial.println(blue, DEC);
+    // Finally set all the pixels to the detected color.
+    for (int i=0; i<10; ++i) {
+      CircuitPlayground.strip.setPixelColor(i, red, green, blue);
+    }
+    CircuitPlayground.strip.show();
+  }
+}
+*/
+
 void playtestsound(){
-  CircuitPlayground.playTone(349,200);
+  for (int thisNote = 0; thisNote < 23; thisNote++) {
+    int noteDuration = 1000/noteDurations[thisNote];
+    CircuitPlayground.playTone(melody[thisNote], 70, noteDuration);
+    delay(noteDuration * 4 / 3); // Wait while the tone plays in the background, plus another 33% delay between notes.
+  }
+
+  
+/*  CircuitPlayground.playTone(349,200);
   CircuitPlayground.playTone(294,200);
   CircuitPlayground.playTone(262,200);
+  */
 }
 
 void playalarm(){ 
