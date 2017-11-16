@@ -20,9 +20,9 @@
 #include <Adafruit_CircuitPlayground.h>
 #include <Wire.h>
 #include <SPI.h> // from analog sensor demo code
-#include "Adafruit_SI1145.h" // will add when we have UV sensor
+#include "Adafruit_SI1145.h" // will add when we have UV senisor
 
-
+//Song constants
 #define  c        261.626    // 261 Hz
 #define  d        293.665    // 294 Hz
 #define  e        329.628    // 329 Hz
@@ -32,7 +32,6 @@
 #define  b        493.883    // 493 Hz
 #define  C        523.251    // 523 Hz
 #define  R        0
-
 
 int melody[] = {  g, c, d, e, e, R, 
                   e, d, e, c, c, R,
@@ -44,7 +43,7 @@ int noteDurations[] = { 4, 4, 4, 4, 4, 8,
                         4, 4, 4, 4, 4, 8,
                         4, 4, 4, 4, 8
                       };
-
+//end of song constants
 
 Adafruit_SI1145 uv = Adafruit_SI1145();
 
@@ -60,7 +59,7 @@ int ledState = LOW;             // ledState used to set the LED
 unsigned long previousMillis = 0;        // will store last time LED was updated
 
 // constants won't change :
-const long interval = 400;           // interval at which to blink (milliseconds)
+const long interval = 300;           // interval at which to blink (milliseconds)
 // end of blinking function variables
 unsigned long currentMillis = 0;
 
@@ -72,10 +71,7 @@ unsigned long currentMillis = 0;
                           //  - A0  = temperature sensor / thermistor
                           //  - A4  = sound sensor / microphone
                           //  - A5  = light sensor
-                          //  - A7  = pin #6 on board
-                          //  - A9  = pin #9 on board
-                          //  - A10 = pin #10 on board
-                          //  - A11 = pin #12 on board
+
 
 uint32_t elapsedtime;
 uint32_t currenttime;
@@ -84,7 +80,10 @@ uint16_t UVsum = 0;
 uint16_t blinkcounter = 0;
 uint32_t threshold = 500; //threshold until warning alarm sounds and lights blink, resets after alarm
 
-int cycles = 0;
+int cycles = 0; //used in alarm function to count number of times leds blink
+
+bool leftButtonPressed;
+bool rightButtonPressed;
 
 void setup() {
   Serial.begin(9600); // Setup serial port.
@@ -94,8 +93,20 @@ void setup() {
 }
 
 void loop() {
-  // Get the sensor value and print it out (can use serial plotter
-  // to view realtime graph!)
+  leftButtonPressed = CircuitPlayground.leftButton();
+  rightButtonPressed = CircuitPlayground.rightButton();
+
+  if(leftButtonPressed){
+    Serial.println("*****************Left button!");
+    CircuitPlayground.playTone(262,200);
+  }
+
+  if(rightButtonPressed){
+    Serial.println("**********************************************************Right button!");
+    CircuitPlayground.playTone(292,100);
+  }
+  
+  // Get the sensor value and print it out
   Serial.println("Circuit Playground UV/photodiode sensor!");
   uint16_t value = analogRead(ANALOG_INPUT);
   UVsum = UVsum + value;
@@ -105,18 +116,14 @@ void loop() {
   Serial.println(UVsum, DEC);
 
   Serial.println("===================");
-  Serial.print("Vis: "); Serial.println(uv.readVisible());
-  Serial.print("IR: "); Serial.println(uv.readIR());
-  
-  //Uncomment if you have an IR LED attached to LED pin!
-  //Serial.print("Prox: "); Serial.println(uv.readProx());
+  Serial.print("Vis: "); Serial.println(uv.readVisible()); //from UV sensor
+  Serial.print("IR: "); Serial.println(uv.readIR()); // from UV sensor
 
   float UVindex = uv.readUV();
   // the index is multiplied by 100 so to get the
   // integer index, divide by 100!
   UVindex /= 100.0;  
   Serial.print("UV: ");  Serial.println(UVindex);
-
 
 /*  if(UVsum > threshold){
     currentMillis = millis(); //current time
@@ -136,7 +143,7 @@ void loop() {
   CircuitPlayground.setPixelColor(1, 200, 200, 200);
   delay(300);
   CircuitPlayground.setPixelColor(2, 200, 200, 200);
-  delay(500);
+  delay(300);
   CircuitPlayground.setPixelColor(3, 200, 200, 200);
   delay(1000);
   CircuitPlayground.clearPixels();
@@ -149,11 +156,10 @@ if (UVsum > threshold){
   CircuitPlayground.setPixelColor(7, 200, 000, 000);
   delay(1000);
   CircuitPlayground.clearPixels();
-  playtestsound();
-  UVsum=0;
+  playsong();
+  UVsum=0; //reset sum for next reading
   Serial.print("outside of while loop ");
   Serial.println(cycles);
-  
   blinklights();
 }
 
@@ -171,9 +177,9 @@ if (UVsum > threshold){
 }
 
 void blinklights(){
-    while(cycles<10) {
+    while(cycles<30) {
     unsigned long currentMillis = millis();
-    Serial.println("inside the while loop");
+    //Serial.println("inside the while loop");
     if (currentMillis - previousMillis >= interval) {
       // save the last time you blinked the LED
       previousMillis = currentMillis;
@@ -182,19 +188,20 @@ void blinklights(){
       Serial.println(cycles);
       // if the LED is off turn it on and vice-versa:
       if (ledState == LOW) {
+        CircuitPlayground.setPixelColor(8, 200, 200, 000);
         CircuitPlayground.setPixelColor(9, 200, 000, 000);
         ledState = HIGH;
       } else {
+        CircuitPlayground.setPixelColor(8, 000, 000, 000);
         CircuitPlayground.setPixelColor(9, 000, 000, 000);
         ledState = LOW;
       }
   
       // set the LED with the ledState of the variable:
-      digitalWrite(ledPin, ledState);
+      //digitalWrite(ledPin, ledState);
       cycles=cycles+1;
     }
-    
-  }
+   }
   cycles=0;
 }
 
@@ -221,20 +228,24 @@ void blinklights(){
 }
 */
 
-void playtestsound(){
+void playsong(){
   for (int thisNote = 0; thisNote < 23; thisNote++) {
     int noteDuration = 1000/noteDurations[thisNote];
-    CircuitPlayground.playTone(melody[thisNote], 70, noteDuration);
+    CircuitPlayground.playTone(melody[thisNote], 100, noteDuration);
     delay(noteDuration * 4 / 3); // Wait while the tone plays in the background, plus another 33% delay between notes.
   }
-
+}
   
-/*  CircuitPlayground.playTone(349,200);
+/*  
+  CircuitPlayground.playTone(349,200);
   CircuitPlayground.playTone(294,200);
   CircuitPlayground.playTone(262,200);
-  */
-}
+*/
 
+
+
+
+/*
 void playalarm(){ 
   //code to play non-annoying alarm and light up lights
 unsigned long currentMillis = millis(); //current time
@@ -255,6 +266,7 @@ while(blinkcounter < 10) { // only play alarm for 5 seconds)
 }
 } //end of while loop for blinking
 } //end of play alarm function
+*/
 
 
 /*
