@@ -76,14 +76,17 @@ unsigned long currentMillis = 0;
 uint32_t elapsedtime;
 uint32_t currenttime;
 uint32_t reapplytime;
+uint16_t UV = 0; // might need to be float, converted value of UV index into J/m^2 (how much energy has hit your screen over the time of the interval)
 uint16_t UVsum = 0;
 uint16_t blinkcounter = 0;
-uint32_t threshold = 500; //threshold until warning alarm sounds and lights blink, resets after alarm
+uint16_t threshold = 500; // Threshold, in units of J/m^2 (probably around 300 for light skinned people), until warning alarm sounds and lights blink
 
 int cycles = 0; //used in alarm function to count number of times leds blink
 
 bool leftButtonPressed;
 bool rightButtonPressed;
+
+int sensorinterval = 5000; // time interval between UV readings - e.g. 120,000 = every 2 minutes
 
 void setup() {
   Serial.begin(9600); // Setup serial port.
@@ -104,10 +107,13 @@ void loop() {
   if(rightButtonPressed){
     Serial.println("**********************************************************Right button!");
     CircuitPlayground.playTone(292,100);
+    //showmethelight();
   }
   
   // Get the sensor value and print it out
   Serial.println("Circuit Playground UV/photodiode sensor!");
+  
+  //Temp values, not using UV reading from sensor
   uint16_t value = analogRead(ANALOG_INPUT);
   UVsum = UVsum + value;
   Serial.print("current value: ");
@@ -116,27 +122,26 @@ void loop() {
   Serial.println(UVsum, DEC);
 
   Serial.println("===================");
-  Serial.print("Vis: "); Serial.println(uv.readVisible()); //from UV sensor
-  Serial.print("IR: "); Serial.println(uv.readIR()); // from UV sensor
+  Serial.print("Vis (sensor): "); Serial.println(uv.readVisible()); //from UV sensor
+  Serial.print("IR (sensor): "); Serial.println(uv.readIR()); // from UV sensor
 
   float UVindex = uv.readUV();
   // the index is multiplied by 100 so to get the
   // integer index, divide by 100!
   UVindex /= 100.0;  
   Serial.print("UV: ");  Serial.println(UVindex);
+  //end of Temp values
 
-/*  if(UVsum > threshold){
-    currentMillis = millis(); //current time
-    while(blinkcounter < 5) { // only play alarm for 5 seconds)
-      CircuitPlayground.setPixelColor(1, 200, 200, 200);
-      delay(1000);
-      CircuitPlayground.clearPixels();
-      blinkcounter = blinkcounter + 1;
-  }
-  blinkcounter = 0;
-  UVsum = 0;
-  }
- */
+/*// uncomment for final code that uses UV index and calculation
+ * float UVindex = uv.readUV();
+ * // the index is multiplied by 100 so to get the integer index, divide by 100!  
+ * UVindex /= 100.0;  
+ * Serial.print("UV: ");  Serial.println(UVindex);
+ * 
+ * // UV is the UV index multiplied by "uv index unit" (25 mW/m^2) and divide by 1000, to get W/m^2. multiply by interval reading (ms) times 1000, to get total Joules exposed to during that interval.
+ * UV = UVindex * .025 * sensorinterval*1000;
+ * UVsum = UVsum + UV; //sum of Joules exposed over time, compare to threshold
+*/
  
   CircuitPlayground.setPixelColor(0, 200, 200, 200);
   delay(300);
@@ -156,7 +161,7 @@ if (UVsum > threshold){
   CircuitPlayground.setPixelColor(7, 200, 000, 000);
   delay(1000);
   CircuitPlayground.clearPixels();
-  playsong();
+  //playsong();
   UVsum=0; //reset sum for next reading
   Serial.print("outside of while loop ");
   Serial.println(cycles);
@@ -172,7 +177,7 @@ if (UVsum > threshold){
   }
 
   // Delay for a bit and repeat the loop.
-  delay(1000); // wait 2 minutes (120,000 ms) for next reading
+  delay(sensorinterval); // wait a certain amount of time between readings
 
 }
 
@@ -235,7 +240,87 @@ void playsong(){
     delay(noteDuration * 4 / 3); // Wait while the tone plays in the background, plus another 33% delay between notes.
   }
 }
-  
+
+//divide the threshold in 10 parts, light up # of LEDS based on UVsum compared to threshold
+void showmethelight(){
+  if (UVsum < (threshold/10)){
+    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+  }
+  else if (UVsum < (2*threshold/10)){
+    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+    CircuitPlayground.setPixelColor(1, 200, 200, 200);
+  }
+  else if (UVsum < (2*threshold/10)){
+    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+    CircuitPlayground.setPixelColor(1, 200, 200, 200);
+    CircuitPlayground.setPixelColor(2, 200, 200, 200);
+  }
+  else if (UVsum < (3*threshold/10)){
+    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+    CircuitPlayground.setPixelColor(1, 200, 200, 200);
+    CircuitPlayground.setPixelColor(2, 200, 200, 200);
+    CircuitPlayground.setPixelColor(3, 200, 200, 200);
+  }
+  else if (UVsum < (4*threshold/10)){
+    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+    CircuitPlayground.setPixelColor(1, 200, 200, 200);
+    CircuitPlayground.setPixelColor(2, 200, 200, 200);
+    CircuitPlayground.setPixelColor(3, 200, 200, 200);
+    CircuitPlayground.setPixelColor(4, 200, 200, 200);
+  }
+  else if (UVsum < (5*threshold/10)){
+    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+    CircuitPlayground.setPixelColor(1, 200, 200, 200);
+    CircuitPlayground.setPixelColor(2, 200, 200, 200);
+    CircuitPlayground.setPixelColor(3, 200, 200, 200);
+    CircuitPlayground.setPixelColor(4, 200, 200, 200);
+    CircuitPlayground.setPixelColor(5, 200, 200, 200);
+  }  
+  else if (UVsum < (6*threshold/10)){
+    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+    CircuitPlayground.setPixelColor(1, 200, 200, 200);
+    CircuitPlayground.setPixelColor(2, 200, 200, 200);
+    CircuitPlayground.setPixelColor(3, 200, 200, 200);
+    CircuitPlayground.setPixelColor(4, 200, 200, 200);
+    CircuitPlayground.setPixelColor(5, 200, 200, 200);
+    CircuitPlayground.setPixelColor(6, 200, 200, 200);
+  }    
+  else if (UVsum < (7*threshold/10)){
+    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+    CircuitPlayground.setPixelColor(1, 200, 200, 200);
+    CircuitPlayground.setPixelColor(2, 200, 200, 200);
+    CircuitPlayground.setPixelColor(3, 200, 200, 200);
+    CircuitPlayground.setPixelColor(4, 200, 200, 200);
+    CircuitPlayground.setPixelColor(5, 200, 200, 200);
+    CircuitPlayground.setPixelColor(6, 200, 200, 200);
+    CircuitPlayground.setPixelColor(7, 200, 200, 200);
+  }    
+  else if (UVsum < (8*threshold/10)){
+    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+    CircuitPlayground.setPixelColor(1, 200, 200, 200);
+    CircuitPlayground.setPixelColor(2, 200, 200, 200);
+    CircuitPlayground.setPixelColor(3, 200, 200, 200);
+    CircuitPlayground.setPixelColor(4, 200, 200, 200);
+    CircuitPlayground.setPixelColor(5, 200, 200, 200);
+    CircuitPlayground.setPixelColor(6, 200, 200, 200);
+    CircuitPlayground.setPixelColor(7, 200, 200, 200);
+    CircuitPlayground.setPixelColor(8, 200, 200, 200);
+  } 
+  else if (UVsum < (7*threshold/10)){
+    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+    CircuitPlayground.setPixelColor(1, 200, 200, 200);
+    CircuitPlayground.setPixelColor(2, 200, 200, 200);
+    CircuitPlayground.setPixelColor(3, 200, 200, 200);
+    CircuitPlayground.setPixelColor(4, 200, 200, 200);
+    CircuitPlayground.setPixelColor(5, 200, 200, 200);
+    CircuitPlayground.setPixelColor(6, 200, 200, 200);
+    CircuitPlayground.setPixelColor(7, 200, 200, 200);
+    CircuitPlayground.setPixelColor(8, 200, 200, 200);
+    CircuitPlayground.setPixelColor(9, 200, 200, 200);
+  }       
+}
+
+
 /*  
   CircuitPlayground.playTone(349,200);
   CircuitPlayground.playTone(294,200);
