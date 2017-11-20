@@ -99,8 +99,8 @@ void loop() {
 
   if(leftButtonPressed){
     Serial.println("*******************************************Left button!");
-    CircuitPlayground.playTone(262,200);
-    //colorsense();
+    //CircuitPlayground.playTone(262,500);
+    colorsense();
   }
 
   if(rightButtonPressed){
@@ -148,8 +148,12 @@ void loop() {
     previousUVtime = millis(); // update last time UV value was recorded
   }
 */
- 
-  CircuitPlayground.setPixelColor(0, 200, 000, 200);
+for (int i=0; i<5; ++i){
+    CircuitPlayground.setPixelColor(i, 220, 0, 220);
+    delay(200);
+}
+ CircuitPlayground.clearPixels();
+ /* CircuitPlayground.setPixelColor(0, 200, 000, 200);
   delay(300);
   CircuitPlayground.setPixelColor(1, 200, 000, 200);
   delay(300);
@@ -158,7 +162,7 @@ void loop() {
   CircuitPlayground.setPixelColor(3, 200, 000, 200);
   delay(1000);
   CircuitPlayground.clearPixels();
-  
+ */ 
   //Loop for when person has surpassed the UV threshold
   if (UVsum > threshold){
     Serial.print("beginning of if loop");
@@ -211,13 +215,18 @@ void blinklights(){
   cycles=0;
 }
 
-/*void colorsense(){
-  bool left_first = CircuitPlayground.leftButton();
-  delay(20);
-  bool left_second = CircuitPlayground.leftButton();
-   if (left_first && !left_second) {
+void colorsense(){
+//  bool left_first = CircuitPlayground.leftButton();
+//  bool left_second = CircuitPlayground.leftButton();
+//   if (left_first && !left_second) {
     CircuitPlayground.clearPixels();
     uint8_t red, green, blue;
+    CircuitPlayground.playTone(262,500);
+    delay(200);
+    CircuitPlayground.playTone(262,500);
+    delay(200);
+    CircuitPlayground.playTone(242,1000);
+    delay(200);
     CircuitPlayground.senseColor(red, green, blue);
     Serial.print("Color: red=");
     Serial.print(red, DEC);
@@ -230,9 +239,9 @@ void blinklights(){
       CircuitPlayground.strip.setPixelColor(i, red, green, blue);
     }
     CircuitPlayground.strip.show();
-  }
+//  }
 }
-*/
+
 
 void playsong(){
   for (int thisNote = 0; thisNote < 23; thisNote++) {
