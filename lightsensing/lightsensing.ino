@@ -80,6 +80,8 @@ uint16_t UV = 0;                // might need to be float, converted value of UV
 uint16_t UVsum = 0;             // holds the sum of all the UV exposure in J/m^2 for the user until you've reached the threshold
 uint16_t blinkcounter = 0;
 
+uint8_t SkinColor;
+
 bool leftButtonPressed;         // left button to run color sense and get skin color
 bool rightButtonPressed;        // right button to light up amount of UV on the skin so far relative to threshold - shomethelight()
 //==============================================================================================================================================================//
@@ -87,9 +89,15 @@ bool rightButtonPressed;        // right button to light up amount of UV on the 
 
 void setup() {
   Serial.begin(9600); // Setup serial port.
-  //Serial.begin(115200); delete in final code
   Serial.println("Circuit Playground UV/photodiode sensor!");
   CircuitPlayground.begin(); // Setup Circuit Playground library.
+  
+  SkinColor = 1;
+  CircuitPlayground.clearPixels();
+  CircuitPlayground.setPixelColor(0, 0xFFFFFF);
+  chooseSkinColor(); //set the skin color level
+
+  //SET THRESHOLD HERE
 }
 
 
@@ -98,7 +106,7 @@ void loop() {
   rightButtonPressed = CircuitPlayground.rightButton();
 
   if(leftButtonPressed){
-    Serial.println("*******************************************Left button!");
+    Serial.println("**********************************************************Left button!");
     //CircuitPlayground.playTone(262,500);
     colorsense();
   }
@@ -184,7 +192,48 @@ for (int i=0; i<5; ++i){
   // Delay for a bit and repeat the loop.
   //delay(sensorinterval); // wait a certain amount of time between readings
 
+} //end of void loop
+
+
+void chooseSkinColor() {
+  int red = 100;
+  int green = 100;
+  int blue = 100;
+  
+  while (!CircuitPlayground.rightButton()) {
+    if (CircuitPlayground.leftButton()) {
+      SkinColor = SkinColor + 1;
+      if (SkinColor > 3) SkinColor = 1;
+      
+      CircuitPlayground.clearPixels();
+      /*
+      // Define LED colors based on selected skin tone
+     if (SkinColor = 1) {
+        red = 100;
+        green = 100;
+        blue = 100;
+      }
+     
+     else if (SkinColor = 2) {
+        red = 166;
+        green = 191;
+        blue = 0;
+      }
+      
+     else if (SkinColor = 3) {
+        red = 124;
+        green = 100;
+        blue = 102;
+      }
+      */
+      for (int p=0; p<(SkinColor*3); p++) {
+        CircuitPlayground.setPixelColor(p, red, green, blue);
+      }    
+      delay(250); 
+    }
+  }
 }
+
 
 void blinklights(){
     while(cycles<20) {
@@ -254,124 +303,64 @@ void playsong(){
 //divide the threshold in 10 parts, light up # of LEDS based on UVsum compared to threshold
 void showmethelight(){
   if (UVsum < (threshold/10)){
-    CircuitPlayground.setPixelColor(0, 200, 200, 200);
+    for (int i=0; i<1; ++i){
+      CircuitPlayground.setPixelColor(i, 220, 200, 220);
+      delay(200);
+    }
   }
   else if (UVsum < (2*threshold/10)){
-    CircuitPlayground.setPixelColor(0, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(1, 200, 200, 200);
+    for (int i=0; i<2; ++i){
+      CircuitPlayground.setPixelColor(i, 220, 200, 220);
+      delay(200);
+    }
   }
   else if (UVsum < (3*threshold/10)){
-    CircuitPlayground.setPixelColor(0, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(1, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(2, 200, 200, 200);
+    for (int i=0; i<3; ++i){
+      CircuitPlayground.setPixelColor(i, 220, 200, 220);
+      delay(200);
+    }
   }
   else if (UVsum < (4*threshold/10)){
-    CircuitPlayground.setPixelColor(0, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(1, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(2, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(3, 200, 200, 200);
+    for (int i=0; i<4; ++i){
+      CircuitPlayground.setPixelColor(i, 220, 200, 220);
+      delay(200);
+    }
   }
   else if (UVsum < (5*threshold/10)){
-    CircuitPlayground.setPixelColor(0, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(1, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(2, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(3, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(4, 200, 200, 200);
+    for (int i=0; i<5; ++i){
+      CircuitPlayground.setPixelColor(i, 220, 200, 220);
+      delay(200);
+    }
   }
   else if (UVsum < (6*threshold/10)){
-    CircuitPlayground.setPixelColor(0, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(1, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(2, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(3, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(4, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(5, 200, 200, 200);
+    for (int i=0; i<6; ++i){
+      CircuitPlayground.setPixelColor(i, 220, 200, 220);
+      delay(200);
+    }
   }
   else if (UVsum < (7*threshold/10)){
-    CircuitPlayground.setPixelColor(0, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(1, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(2, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(3, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(4, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(5, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(6, 200, 200, 200);
+    for (int i=0; i<7; ++i){
+      CircuitPlayground.setPixelColor(i, 220, 200, 220);
+      delay(200);
+    }
   }
   else if (UVsum < (8*threshold/10)){
-    CircuitPlayground.setPixelColor(0, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(1, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(2, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(3, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(4, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(5, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(6, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(7, 200, 200, 200);
+    for (int i=0; i<8; ++i){
+      CircuitPlayground.setPixelColor(i, 220, 200, 220);
+      delay(200);
+    }
   }
   else if (UVsum < (9*threshold/10)){
-    CircuitPlayground.setPixelColor(0, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(1, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(2, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(3, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(4, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(5, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(6, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(7, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(8, 200, 200, 200);
+    for (int i=0; i<9; ++i){
+      CircuitPlayground.setPixelColor(i, 220, 200, 220);
+      delay(200);
+    }
   }
   else if (UVsum < (10*threshold/10)){
-    CircuitPlayground.setPixelColor(0, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(1, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(2, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(3, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(4, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(5, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(6, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(7, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(8, 200, 200, 200);
-    delay(200);
-    CircuitPlayground.setPixelColor(9, 200, 200, 200);
+    for (int i=0; i<10; ++i){
+      CircuitPlayground.setPixelColor(i, 220, 200, 220);
+      delay(200);
+    }
   }
   delay(1000);
   CircuitPlayground.clearPixels();
